@@ -93,13 +93,11 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             if(this.article.multimedia.length > 0){
                 Log.i("success", this.article.multimedia[0].url);
                 setImage(this.article.multimedia[0].url,this.article.thumbnail_standard);
-                //Log.i("success", this.article.multimedia.get(0).height + "");
-                //Log.i("success", this.article.multimedia.get(0).width + "");
             }
         }
 
         public void setImage(String url, String thumbnail){
-            Glide.with(view).load(url).thumbnail(Glide.with(view).load(thumbnail)).into(image_view);
+           Glide.with(view).load(url).thumbnail(Glide.with(view).load(thumbnail)).into(image_view);
         }
 
         @Override

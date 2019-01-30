@@ -170,9 +170,10 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
 
     @Override
     public void onArticleClickListener(Article clickedArticle) {
-        Intent intent = new Intent(this, ArticleVideos.class);
+        Intent intent = new Intent(this, ArticleDetail.class);
         String json = gson.toJson(clickedArticle);
         intent.putExtra("JSON", json);
+        Log.i()
         if(clickedArticle.multimedia.length > 0){
             intent.putExtra("URL", clickedArticle.multimedia[0].url);
         }
