@@ -173,9 +173,11 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
         Intent intent = new Intent(this, ArticleDetail.class);
         String json = gson.toJson(clickedArticle);
         intent.putExtra("JSON", json);
-        Log.i()
+        //Log.i("success", clickedArticle.multimedia[clickedArticle.multimedia.length-1].height + "");
+        //Log.i("success", clickedArticle.multimedia[clickedArticle.multimedia.length-1].width + "");
+
         if(clickedArticle.multimedia.length > 0){
-            intent.putExtra("URL", clickedArticle.multimedia[0].url);
+            intent.putExtra("URL", clickedArticle.multimedia[clickedArticle.multimedia.length-1].url);
         }
         startActivity(intent);
     }

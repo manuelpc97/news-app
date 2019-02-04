@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String userId;
 
     int googleRequestCode = 1;
+    Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,12 +177,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         userId = null;
                         logIn();
                     }else{
-                        Log.i("success", "No es un usuario valido");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showMessage("Usuario Incorrecto");
+                            }
+                        });
                     }
 
                 }
             }
         });
+    }
+
+    private void showMessage(String message){
+        toast = Toast.makeText(this, message,Toast.LENGTH_LONG);
+        toast.show();
     }
 
     private boolean isValidUser(String json, String name, String password){

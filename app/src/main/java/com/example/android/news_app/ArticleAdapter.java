@@ -92,12 +92,14 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
             title_textview.setText(this.article.title);
             if(this.article.multimedia.length > 0){
                 Log.i("success", this.article.multimedia[0].url);
-                setImage(this.article.multimedia[0].url,this.article.thumbnail_standard);
+                setImage(this.article.multimedia[0].url);
+            }else{
+                setImage("https://i2.wp.com/kerryhannon.com/wp-content/uploads/2013/11/the-new-york-times-logo.jpg?fit=300%2C263&ssl=1");
             }
         }
 
-        public void setImage(String url, String thumbnail){
-           Glide.with(view).load(url).thumbnail(Glide.with(view).load(thumbnail)).into(image_view);
+        public void setImage(String url){
+           Glide.with(view).load(url).into(image_view);
         }
 
         @Override

@@ -25,8 +25,18 @@ import android.widget.TextView;
 import com.example.android.news_app.NYTimes.Article;
 import com.example.android.news_app.NYTimes.Multimedia;
 import com.example.android.news_app.NYTimes.MultimediaArrayAdapter;
+import com.example.android.news_app.Youtube.YoutubeResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ArticleDetail extends AppCompatActivity {
 
@@ -45,6 +55,10 @@ public class ArticleDetail extends AppCompatActivity {
     String url;
     Gson gson;
     GsonBuilder builder;
+
+    int HEIGHT = 293;
+    int WIDTH = 440;
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -55,11 +69,28 @@ public class ArticleDetail extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_detail);
 
+        builder = new GsonBuilder();
+        builder.registerTypeAdapter(Multimedia[].class, new MultimediaArrayAdapter());
+        gson = builder.create();
+
+        Intent intent = getIntent();
+        if(intent.hasExtra("JSON")){
+            json = intent.getStringExtra("JSON");
+            article = gson.fromJson(json, Article.class);
+        }
+
+        if(intent.hasExtra("URL")){
+            url = intent.getStringExtra("URL");
+        }
+        setupTabs();
+    }
+
+    public void setupTabs(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), article.title);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -78,23 +109,8 @@ public class ArticleDetail extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-
-        builder = new GsonBuilder();
-        builder.registerTypeAdapter(Multimedia[].class, new MultimediaArrayAdapter());
-        gson = builder.create();
-
-        Intent intent = getIntent();
-        if(intent.hasExtra("JSON")){
-            json = intent.getStringExtra("JSON");
-            article = gson.fromJson(json, Article.class);
-        }
-
-        if(intent.hasExtra("URL")){
-            url = intent.getStringExtra("URL");
-        }
-
     }
+
 
 
     @Override
@@ -122,19 +138,27 @@ public class ArticleDetail extends AppCompatActivity {
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        String title;
+
+        public SectionsPagerAdapter(FragmentManager fm,String title) {
             super(fm);
+            this.title = title;
         }
 
         @Override
         public Fragment getItem(int position) {
-           switch(position){
+            Bundle bundle = new Bundle();
+            switch(position){
                case 0:
                    Detail detail = new Detail();
+                   bundle.putString("URL", article.url);
+                   detail.setArguments(bundle);
                    return detail;
 
                case 1:
                    Videos videos = new Videos();
+                   bundle.putString("TITLE", title);
+                   videos.setArguments(bundle);
                    return videos;
            }
            return null;
@@ -159,4 +183,5 @@ public class ArticleDetail extends AppCompatActivity {
             return "";
         }
     }
+
 }
