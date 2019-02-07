@@ -9,7 +9,7 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="20dp"
         android:background="@color/productGridBackgroundColor"
         android:paddingStart="@dimen/shr_product_grid_spacing"
         android:paddingEnd="@dimen/shr_product_grid_spacing"
@@ -21,5 +21,12 @@
             android:layout_height="match_parent" />
 
     </android.support.v4.widget.NestedScrollView>
+
+    <ProgressBar
+        android:layout_height="42dp"
+        android:layout_width="42dp"
+        android:id="@+id/pb3"
+        android:layout_gravity="center"
+        android:visibility="invisible"/>
 
 </FrameLayout>

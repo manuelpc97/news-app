@@ -2,6 +2,7 @@ package com.example.android.news_app;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int googleRequestCode = 1;
     Toast toast;
 
+    ProgressBar loading;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         userTextView = (EditText) findViewById(R.id.user_textview);
         passwordTextView = (EditText) findViewById(R.id.password_textview);
+
+        loading = findViewById(R.id.pb4);
 
         support = new DatabaseSupport();
         client = new OkHttpClient();
@@ -159,17 +165,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void verifyCredentials(final String user, final String password){
         Request request = support.get();
 
+        loading.setVisibility(View.VISIBLE);
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        showMessage("ERROR, CHECK NETWORK CONNECTION");
+                    }
+                });
+                showMessage("ERROR, CHECK NETWORK CONNECTION");
                 e.printStackTrace();
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if(!response.isSuccessful()) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showMessage("ERROR, CHECK NETWORK CONNECTION");
+                        }
+                    });
                     throw new IOException("Unexpected code: " + response);
                 }else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loading.setVisibility(View.INVISIBLE);
+                        }
+                    });
                     boolean isValiduser = isValidUser(response.body().string(), user, password);
 
                     if(isValiduser){
@@ -190,9 +217,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void showMessage(String message){
-        toast = Toast.makeText(this, message,Toast.LENGTH_LONG);
-        toast.show();
+    private void showMessage(final String message){
+        //loading.setVisibility(View.INVISIBLE);
+        new Handler(getMainLooper()).post(new Runnable(){
+            @Override
+            public void run() {
+                toast = Toast.makeText(getApplicationContext(), message,Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
     }
 
     private boolean isValidUser(String json, String name, String password){

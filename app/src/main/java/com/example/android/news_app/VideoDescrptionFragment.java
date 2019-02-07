@@ -7,17 +7,19 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 public class VideoDescrptionFragment extends Fragment {
 
     TextView description_textview;
     TextView title_textview;
-    TextView channel_textview;
 
     String title;
     String description;
-    String channel;
+    String image_url;
 
     public VideoDescrptionFragment(){
 
@@ -30,17 +32,14 @@ public class VideoDescrptionFragment extends Fragment {
 
         description_textview = (TextView) view.findViewById(R.id.video_description_textview);
         title_textview = (TextView) view.findViewById(R.id.video_title_textview);
-        channel_textview = (TextView) view.findViewById(R.id.video_channel_textview);
 
         Bundle bundle= getArguments();
         title = bundle.getString("TITLE");
         description = bundle.getString("DESCRIPTION");
-        channel = bundle.getString("CHANNEL");
+        image_url = bundle.getString("URL");
 
         description_textview.setText(description);
         title_textview.setText(title);
-        channel_textview.setText(channel);
-
         return view;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.android.news_app;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -21,11 +22,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.news_app.NYTimes.Article;
 import com.example.android.news_app.NYTimes.Multimedia;
 import com.example.android.news_app.NYTimes.MultimediaArrayAdapter;
 import com.example.android.news_app.Youtube.YoutubeResponse;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -58,6 +63,7 @@ public class ArticleDetail extends AppCompatActivity {
 
     int HEIGHT = 293;
     int WIDTH = 440;
+
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -116,7 +122,11 @@ public class ArticleDetail extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.home_menu, menu);
+        //CastButtonFactory.setUpMediaRouteButton(getApplicationContext(),
+          //      menu,
+            //    R.id.media_route_menu_item);
         return true;
     }
 
@@ -127,12 +137,17 @@ public class ArticleDetail extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if(id == R.id.log_out){
+            goToLogIn();
         }
 
-        return super.onOptionsItemSelected(item);
+        return true;
+    }
+
+
+    public void goToLogIn(){
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
     }
 
 

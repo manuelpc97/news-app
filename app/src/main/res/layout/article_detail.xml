@@ -7,4 +7,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/article_webview"/>
+    <ProgressBar
+        android:layout_height="42dp"
+        android:layout_width="42dp"
+        android:id="@+id/pb2"
+        android:layout_gravity="center"
+        android:visibility="invisible"/>
 </FrameLayout>

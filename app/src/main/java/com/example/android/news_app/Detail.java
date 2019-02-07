@@ -7,12 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class Detail extends Fragment {
 
     WebView webview;
     String url;
+    ProgressBar loading;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,7 +27,10 @@ public class Detail extends Fragment {
         View rootView = inflater.inflate(R.layout.article_detail, container, false);
 
         webview = (WebView) rootView.findViewById(R.id.article_webview);
+        loading = rootView.findViewById(R.id.pb2);
+        loading.setVisibility(View.VISIBLE);
         url = getArguments().getString("URL");
+        loading.setVisibility(View.INVISIBLE);
         webview.loadUrl(url);
         return rootView;
     }

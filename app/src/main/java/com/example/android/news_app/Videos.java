@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.android.news_app.Youtube.Resource;
@@ -33,8 +34,7 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
     Gson gson;
 
     String YOUTUBE_GET_URL = "https://www.googleapis.com/youtube/v3/search";
-    String API_KEY = "AIzaSyC0R8Ozogl1GjP08rDNtILESXz_sNDj8sQ";
-    String YOUTUBE_VIDEO_URL;
+    String API_KEY = "AIzaSyBsZ06pyFqX2MjptShZCNWnpBsQWaLiRVo";
 
     OkHttpClient client;
     Request request;
@@ -42,19 +42,31 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
     Bundle bundle;
 
     String title;
-    Handler handler;
-    Runnable handlerTask;
-
+    String videoJSON;
+    Resource video;
     VideosAdapter adapter;
+    Boolean mustSkip = false;
+
+    ProgressBar loading;
+    String errorMessage = "ERROR, CHECK YOUT INTERNET CONNECTION";
+    Toast toast;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.video_grid_fragment , container, false);
-        title = getArguments().getString("TITLE");
+        loading = rootView.findViewById(R.id.pb3);
+
         gson = new Gson();
 
+        bundle = getArguments();
+        title = bundle.getString("TITLE");
 
+        if(bundle.containsKey("JSON")){
+            videoJSON = bundle.getString("JSON");
+            video = gson.fromJson(videoJSON, Resource.class);
+            mustSkip = true;
+        }
 
         client = new OkHttpClient();
         httpBuilder = HttpUrl.parse(YOUTUBE_GET_URL).newBuilder();
@@ -65,9 +77,11 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
         //httpBuilder.addQueryParameter("videoEmbedable", "true");
 
         request = new Request.Builder().url(httpBuilder.build()).build();
+        loading.setVisibility(View.VISIBLE);
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                showErrorMessage();
                 e.printStackTrace();
             }
 
@@ -75,14 +89,21 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
             public void onResponse(Call call, Response response) throws IOException {
                 if(!response.isSuccessful()){
                     Log.i("success", response.body().string());
+                    showErrorMessage();
                 }else{
                     videosJSON = response.body().string();
                     videos = gson.fromJson(videosJSON, YoutubeResponse.class);
+
+                    if(mustSkip){
+                        deleteVideo();
+                    }
+
                     Log.i("success", videosJSON);
 
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
+                            loading.setVisibility(View.INVISIBLE);
                             startRecyclerView(rootView);
                         }
                     });
@@ -93,6 +114,28 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
         return rootView;
     }
 
+    public void deleteVideo(){
+        int index = -1;
+        for(int i = 0; i < videos.items.size(); i++){
+            if(videos.items.get(i).snippet.title.equals(video.snippet.title)){
+                index = i;
+            }
+        }
+
+        if(index != -1){
+            videos.items.remove(index);
+        }
+    }
+    public void showErrorMessage(){
+        //loading.setVisibility(View.INVISIBLE);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                toast = Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
+    }
     public void startRecyclerView(View rootView){
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -102,6 +145,11 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
         int largePadding = getResources().getDimensionPixelSize(R.dimen.shr_product_grid_spacing);
         int smallPadding = getResources().getDimensionPixelSize(R.dimen.shr_product_grid_spacing_small);
         recyclerView.addItemDecoration(new ProductGridItemDecoration(largePadding, smallPadding));
+
+        if(videos.items.size() == 0){
+            Toast toast = Toast.makeText(getContext(), "NO VIDEOS FOUND", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     @Override

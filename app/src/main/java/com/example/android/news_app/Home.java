@@ -1,15 +1,20 @@
 package com.example.android.news_app;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.MediaRouteButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -20,6 +25,8 @@ import com.example.android.news_app.NYTimes.MultimediaArrayAdapter;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
@@ -55,11 +62,22 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
 
     Container container;
     Toast toast;
+    String errorMessage = "ERROR, CHECK INTERNET CONNECTION";
+    ProgressBar loading;
+    CastContext castContext;
+    //MediaRouteButton mMediaRouteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        loading = (ProgressBar)findViewById(R.id.pb1);
+
+        //mMediaRouteButton = (MediaRouteButton) findViewById(R.id.media_route_button);
+        //CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), mMediaRouteButton);
+
+        //castContext = CastContext.getSharedInstance(this);
 
         if(savedInstanceState == null){
             Bundle extras = getIntent().getExtras();
@@ -91,17 +109,26 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
                url("https://api.nytimes.com/svc/news/v3/content/all/all.json?api-key=EL6ZjeqVKQp9YT3hZI80b6vTPwI9c73K").
                build();
 
+        loading.setVisibility(View.VISIBLE);
        client.newCall(request).enqueue(new Callback() {
            @Override
            public void onFailure(Call call, IOException e) {
+               showErrorMessage();
                e.printStackTrace();
            }
 
            @Override
            public void onResponse(Call call, Response response) throws IOException {
                 if(!response.isSuccessful()){
+                    showErrorMessage();
                     throw new IOException("Unexpected code " + response.toString());
                 }else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loading.setVisibility(View.INVISIBLE);
+                        }
+                    });
                     String json = response.body().string();
                     String[] splitted = json.split("multimedia");
 
@@ -124,6 +151,18 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
        });
     }
 
+    public void showErrorMessage(){
+        //loading.setVisibility(View.INVISIBLE);
+        new Handler(getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+
+                toast = Toast.makeText(getBaseContext(), errorMessage,Toast.LENGTH_LONG);
+                toast.show();
+            }
+        });
+    }
+
     public void startRecyclerView(){
         articlesRecyclerview = (RecyclerView) findViewById(R.id.articles_rv);
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -136,6 +175,11 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.home_menu, menu);
+        Log.i("menu", "llego");
+        //CastButtonFactory.setUpMediaRouteButton(getApplicationContext(),
+          //      menu,
+            //    R.id.media_route_menu_item);
+        super.onCreateOptionsMenu(menu);
         return true;
     }
 
