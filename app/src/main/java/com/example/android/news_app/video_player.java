@@ -1,17 +1,14 @@
 package com.example.android.news_app;
 
 import android.content.res.Configuration;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.os.Build;
+import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -25,25 +22,23 @@ import android.view.View;
 import com.example.android.news_app.Casting.Video;
 import com.example.android.news_app.Youtube.Resource;
 import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaLoadOptions;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
-import com.google.android.gms.cast.framework.Session;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
-import com.google.android.gms.common.images.WebImage;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.google.gson.Gson;
-import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayer;
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext;
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.io.infrastructure.ChromecastConnectionListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.AbstractYouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerInitListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -55,13 +50,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class video_player extends AppCompatActivity implements YouTubePlayer.OnInitializedListener{
+public class video_player extends AppCompatActivity implements YouTubePlayer.OnInitializedListener, YouTubePlayer.PlaybackEventListener{
 
     String videoJSON;
     Resource video;
     Gson gson;
 
-    String API_KEY ="AIzaSyBsZ06pyFqX2MjptShZCNWnpBsQWaLiRVo";
+    String API_KEY ="AIzaSyA7Q0jbZTE3Vh3wLfSPxTvegWtL8l7NdB8";
 
 
     Video[] videosToPlay;
@@ -70,85 +65,16 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
     SectionsPagerAdapter pagerAdapter;
     FragmentManager manager;
 
-    CastContext castContext;
     CastSession session;
     SessionManager sessionManager;
-    SessionManagerListener  sessionListener = new SessionManagerListener<CastSession>() {
-        @Override
-        public void onSessionStarting(CastSession castSession) {
-            Log.i("holis", "starting");
-        }
-
-        @Override
-        public void onSessionStarted(CastSession castSession, String s) {
-            Log.i("holis", "started");
-            MediaMetadata metadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-            metadata.putString(MediaMetadata.KEY_TITLE,video.snippet.title);
-
-
-            if(videosToPlay != null){
-                Log.i("mistake", "antes del if");
-                url = videosToPlay[0].url;
-                type = videosToPlay[0].type;
-                Log.i("mistake", "despues del if");
-            }else{
-                Log.i("mistake", "Soy null");
-            }
-
-            if(url != null){
-                MediaInfo mediaInfo = new MediaInfo.Builder(url).
-                        setStreamType(MediaInfo.STREAM_TYPE_BUFFERED).setContentType(type).setMetadata(metadata).setStreamDuration(player.getDurationMillis())
-                        .build();
-
-                RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-                remoteMediaClient.load(mediaInfo);
-            }else{
-                MediaInfo mediaInfo = new MediaInfo.Builder("").setMetadata(metadata).build();
-                RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-                remoteMediaClient.load(mediaInfo);
-            }
-        }
-
-        @Override
-        public void onSessionStartFailed(CastSession castSession, int i) {
-            Log.i("holis", "failed");
-        }
-
-        @Override
-        public void onSessionEnding(CastSession castSession) {
-            Log.i("holis", "ending");
-        }
-
-        @Override
-        public void onSessionEnded(CastSession castSession, int i) {
-            Log.i("holis", "ended");
-        }
-
-        @Override
-        public void onSessionResuming(CastSession castSession, String s) {
-            Log.i("holis", "resuming");
-        }
-
-        @Override
-        public void onSessionResumed(CastSession castSession, boolean b) {
-            Log.i("holis", "resumed");
-        }
-
-        @Override
-        public void onSessionResumeFailed(CastSession castSession, int i) {
-            Log.i("holis", "failed");
-        }
-
-        @Override
-        public void onSessionSuspended(CastSession castSession, int i) {
-            Log.i("holis", "suspended");
-        }
-    };
 
     YouTubePlayer player;
-
-    String url;
-    String type;
+    com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer chromecastPlayer;
+    boolean sessionStarted = false;
+    ChromecastYouTubePlayerContext playerContext;
+    PlayerListener listener;
+    YouTubePlayerInitListener initListener;
+    SimpleChromecastConnectionListener simpleListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,68 +84,103 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
         Intent intent = getIntent();
         gson = new Gson();
 
-        //initChromecast();
+        sessionManager = CastContext.getSharedInstance(this).getSessionManager();
 
         if(intent.hasExtra("JSON")){
             videoJSON = intent.getStringExtra("JSON");
             video = gson.fromJson(videoJSON, Resource.class);
         }
 
-        sessionManager = CastContext.getSharedInstance(this).getSessionManager();
-        gettingURL();
-
+        Log.i("playing", "createID");
+        Log.i("playing", video.id.videoId);
         initializeYoutube();
+        initChromecast();
         setupBar();
     }
 
-    public void gettingURL(){
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url("https://you-link.herokuapp.com/?url=https://www.youtube.com/watch?v=" + video.id.videoId).build();
-
-        Log.i("prueba", "llegue");
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i("prueba", "error");
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if(!response.isSuccessful()){
-                    Log.i("prueba", "unexpected code: " + response.body().string());
-                }else{
-                    videosToPlay = gson.fromJson(response.body().string(), Video[].class);
-                }
-            }
-        });
-    }
 
     @Override
     protected void onResume() {
+        Log.i("playing", "resume");
         if(sessionManager == null){
             sessionManager = CastContext.getSharedInstance(this).getSessionManager();
         }
-        session = sessionManager.getCurrentCastSession();
-        sessionManager.addSessionManagerListener(sessionListener);
+       //session = sessionManager.getCurrentCastSession();
         super.onResume();
     }
 
-
-
-        @Override
+    @Override
     protected void onPause() {
+        Log.i("playing", "paused");
         super.onPause();
-        sessionManager.removeSessionManagerListener(sessionListener);
+        //session = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i("playing", "ONDESTROY");
+        super.onDestroy();
+        player.release();
+//        sessionManager.endCurrentSession(true);
+        //chromecastPlayer = null;
         session = null;
+        playerContext.removeChromecastConnectionListener(simpleListener);
+        playerContext = null;
+        initListener = null;
     }
 
     public Unit initChromecast(){
-       new ChromecastYouTubePlayerContext(sessionManager, new SimpleChromecastConnectionListener());
+        Log.i("playing", "initialized_chromecast");
+        Log.i("playing", video.id.videoId);
+        Log.i("playing", sessionManager.toString());
+        simpleListener = new SimpleChromecastConnectionListener(video.id.videoId);
+       playerContext = new ChromecastYouTubePlayerContext(sessionManager, simpleListener);
        return Unit.INSTANCE;
     }
 
+    @Override
+    public void onPlaying() {
+        Log.i("playing", "playing");
+        if(chromecastPlayer != null){
+            chromecastPlayer.play();
+        }
+    }
+
+    @Override
+    public void onPaused() {
+        if(chromecastPlayer != null){
+            chromecastPlayer.pause();
+        }
+    }
+
+    @Override
+    public void onStopped() {
+        Log.i("playing", "stopped");
+
+    }
+
+    @Override
+    public void onBuffering(boolean b) {
+
+    }
+
+    @Override
+    public void onSeekTo(int i) {
+        if(chromecastPlayer != null){
+            chromecastPlayer.seekTo(i);
+        }
+    }
+
     private class SimpleChromecastConnectionListener implements ChromecastConnectionListener {
+        String ID;
+        int counter = 0;
+
+        public SimpleChromecastConnectionListener(String id){
+            Log.i("playing", "setting " + id);
+            ID = id;
+        }
+
+
         @Override
         public void onChromecastConnecting() {
             Log.i("holis", "chromecast connecting");
@@ -227,31 +188,41 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
         @Override
         public void onChromecastConnected(
                 ChromecastYouTubePlayerContext chromecastYouTubePlayerContext) {
-            Log.i("holis","chromecast connected");
-            initializeCastPlayer(chromecastYouTubePlayerContext);
+            Log.i("playing","chromecast connected");
+            Log.i("playing", ID);
+            if(counter == 0){
+                counter++;
+                initListener = new YouTubePlayerInitListener() {
+                    @Override
+                    public void onInitSuccess(final com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer youtubePlayer) {
+                        listener.videoId = ID;
+                        Log.i("playing", "before");
+                        Log.i("playing", listener.videoId);
+                        Log.i("playing", ID);
+                        listener.youtubePlayer = youtubePlayer;
+                        chromecastPlayer = youtubePlayer;
+                        youtubePlayer.addListener(listener);
+                    }
+                };
+                chromecastYouTubePlayerContext.initialize(initListener);
+
+            }
         }
+
         @Override
         public void onChromecastDisconnected() {
-            Log.i("holis", "chromecast disconnected");
-        }
-        private void initializeCastPlayer(
-                ChromecastYouTubePlayerContext chromecastYouTubePlayerContext) {
-            chromecastYouTubePlayerContext.initialize(new YouTubePlayerInitListener() {
-                @Override
-                public void onInitSuccess(final com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer youtubePlayer) {
-                    youtubePlayer.addListener(new AbstractYouTubePlayerListener() {
-                        @Override
-                        public void onReady() {
-                            youtubePlayer.loadVideo("6JYIGclVQdw", 0f);
-                        }
-                    });
-                }
-            });
+            Log.i("playing", "chromecast disconnected");
+            sessionManager = null;
+            chromecastPlayer = null;
+            session = null;
+            playerContext.removeChromecastConnectionListener(this);
+
         }
     }
 
 
     public void initializeYoutube(){
+        Log.i("playing", "initialized_youtube");
         fragment = (YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(R.id.video_container);
         fragment.initialize(API_KEY, this);
     }
@@ -311,9 +282,12 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
 
     @Override
     public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+        Log.i("playing", "initialized_youtube2");
+        Log.i("playing", video.id.videoId);
         player = youTubePlayer;
-        youTubePlayer.loadVideo(video.id.videoId);
-        youTubePlayer.play();
+        player.loadVideo(video.id.videoId);
+        player.setPlaybackEventListener(this);
+        listener = new PlayerListener(player,video.id.videoId);
     }
 
     @Override
@@ -387,6 +361,41 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
             }
 
             return "";
+        }
+    }
+
+    public class InitPlayerListener implements YouTubePlayerInitListener{
+        String ID;
+
+        public InitPlayerListener(String id){
+            this.ID = id;
+        }
+
+        @Override
+        public void onInitSuccess(com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer youTubePlayer) {
+
+        }
+    }
+
+    public class PlayerListener extends AbstractYouTubePlayerListener{
+        public String videoId;
+        public YouTubePlayer player;
+        public com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer youtubePlayer;
+
+        PlayerListener(YouTubePlayer player, String videoId){
+            this.player = player;
+            this.videoId = videoId;
+        }
+
+        @Override
+        public void onReady() {
+            super.onReady();
+
+            Log.i("playing", "intialized_chromecast2");
+            Log.i("playing", videoId);
+            youtubePlayer.loadVideo(videoId, 0f );
+            youtubePlayer.play();
+            chromecastPlayer = youtubePlayer;
         }
     }
 }

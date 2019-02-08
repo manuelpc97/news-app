@@ -66,10 +66,12 @@ public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.VideosView
         public void bind(Resource video){
             this.video = video;
             titleTextView.setText(this.video.snippet.title);
-            if(this.video.snippet.thumbnails.medium != null){
-                Glide.with(view).load(this.video.snippet.thumbnails.medium.url).into(imageview);
-            }else{
-                Glide.with(view).load("https://upload.wikimedia.org/wikipedia/commons/e/e1/Logo_of_YouTube_%282015-2017%29.svg").into(imageview);
+            if(this.video.snippet.thumbnails!= null){
+                if(this.video.snippet.thumbnails.medium != null){
+                    Glide.with(view).load(this.video.snippet.thumbnails.medium.url).into(imageview);
+                }else{
+                    Glide.with(view).load("https://upload.wikimedia.org/wikipedia/commons/e/e1/Logo_of_YouTube_%282015-2017%29.svg").into(imageview);
+                }
             }
         }
 
