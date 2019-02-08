@@ -19,11 +19,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext;
+import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.io.infrastructure.ChromecastConnectionListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.AbstractYouTubePlayerListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerInitListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +45,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    public static int sum;
     GoogleSignInOptions googleSignInOptions;
     GoogleSignInClient googleClient;
     SignInButton signInButton;
@@ -61,6 +69,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Toast toast;
 
     ProgressBar loading;
+
+    public static CastSession session;
+    public static SessionManager sessionManager;
+
+    public static SimpleChromecastConnectionListener simpleListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         support = new DatabaseSupport();
         client = new OkHttpClient();
         gson = new Gson();
+        simpleListener = new SimpleChromecastConnectionListener("");
     }
 
 
@@ -217,6 +231,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(sessionManager == null){
+                Log.i("playing", "resumeNULL");
+                sessionManager = CastContext.getSharedInstance(this).getSessionManager();
+        }
+        session = sessionManager.getCurrentCastSession();
+    }
+
     private void showMessage(final String message){
         //loading.setVisibility(View.INVISIBLE);
         new Handler(getMainLooper()).post(new Runnable(){
@@ -239,5 +263,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        }
       return false;
     }
-
 }
