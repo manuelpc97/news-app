@@ -224,8 +224,6 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
 
     @Override
     public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-        Log.i("playing", "initialized_youtube2");
-        Log.i("playing", video.id.videoId);
         player = youTubePlayer;
         player.loadVideo(video.id.videoId);
         player.setPlaybackEventListener(this);

@@ -140,6 +140,7 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false));
+        cleanVideos();
         adapter = new VideosAdapter(videos.items, this);
         recyclerView.setAdapter(adapter);
         int largePadding = getResources().getDimensionPixelSize(R.dimen.shr_product_grid_spacing);
@@ -149,6 +150,14 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
         if(videos.items.size() == 0){
             Toast toast = Toast.makeText(getContext(), "NO VIDEOS FOUND", Toast.LENGTH_LONG);
             toast.show();
+        }
+    }
+
+    public void cleanVideos(){
+        for(int i = 0; i < videos.items.size(); i++){
+            if(videos.items.get(i).id.videoId == null){
+                videos.items.remove(i);
+            }
         }
     }
 
