@@ -21,7 +21,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.Session;
 import com.google.android.gms.cast.framework.SessionManager;
+import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -72,8 +74,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static CastSession session;
     public static SessionManager sessionManager;
+    public static ChromecastYouTubePlayerContext playerContext;
 
     public static SimpleChromecastConnectionListener simpleListener;
+    public SessionManagerListener sessionListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +114,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         support = new DatabaseSupport();
         client = new OkHttpClient();
         gson = new Gson();
-        simpleListener = new SimpleChromecastConnectionListener("");
+
+        simpleListener = new SimpleChromecastConnectionListener("", this);
+
     }
 
 
@@ -238,7 +244,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.i("playing", "resumeNULL");
                 sessionManager = CastContext.getSharedInstance(this).getSessionManager();
         }
+        setUpCastListener();
         session = sessionManager.getCurrentCastSession();
+        sessionManager.addSessionManagerListener(sessionListener);
+
+        playerContext = new ChromecastYouTubePlayerContext(sessionManager, simpleListener);
+    }
+
+    public void setUpCastListener(){
+        sessionListener = new SessionManagerListener() {
+            @Override
+            public void onSessionStarting(Session session) {
+                Log.i("chromecast", "starting");
+            }
+
+            @Override
+            public void onSessionStarted(Session session, String s) {
+                Log.i("chromecast", "started");
+                //View view = findViewById(R.id.castMiniController);
+                //view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onSessionStartFailed(Session session, int i) {
+                Log.i("chromecast", "failed");
+            }
+
+            @Override
+            public void onSessionEnding(Session session) {
+                Log.i("chromecast", "ending");
+            }
+
+            @Override
+            public void onSessionEnded(Session session, int i) {
+                Log.i("chromecast", "ended");
+            }
+
+            @Override
+            public void onSessionResuming(Session session, String s) {
+                Log.i("chromecast", "resuming");
+            }
+
+            @Override
+            public void onSessionResumed(Session session, boolean b) {
+                Log.i("chromecast", "resumed");
+            }
+
+            @Override
+            public void onSessionResumeFailed(Session session, int i) {
+                Log.i("chromecast", "resumeFailed");
+            }
+
+            @Override
+            public void onSessionSuspended(Session session, int i) {
+                Log.i("chromecast", "sessionSuspended");
+            }
+        };
     }
 
     private void showMessage(final String message){

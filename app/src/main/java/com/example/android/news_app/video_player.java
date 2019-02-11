@@ -52,13 +52,13 @@ import okhttp3.Response;
 
 import static com.example.android.news_app.MainActivity.simpleListener;
 
-public class video_player extends AppCompatActivity implements YouTubePlayer.OnInitializedListener, YouTubePlayer.PlaybackEventListener{
+public class video_player extends AppCompatActivity implements YouTubePlayer.OnInitializedListener, YouTubePlayer.PlaybackEventListener, YouTubePlayer.PlayerStateChangeListener{
 
     String videoJSON;
     Resource video;
     Gson gson;
 
-    String API_KEY ="AIzaSyBneUVqtvreUp4KZxe9Njf6oGR7nXIWHKo";
+    String API_KEY ="AIzaSyDj_hWlpf2RnIoOTQ0jJ0EnX8DRPG0A1Hk";
 
 
     Video[] videosToPlay;
@@ -71,7 +71,6 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
 
     YouTubePlayer player;
     com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer chromecastPlayer;
-    ChromecastYouTubePlayerContext playerContext;
     boolean settedSession;
 
     @Override
@@ -94,7 +93,6 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
 
     @Override
     protected void onResume() {
-
         super.onResume();
     }
 
@@ -106,7 +104,10 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        playerContext.endCurrentSession();
+        if(simpleListener.player != null){
+            simpleListener.player.play();
+        }
+        //playerContext.endCurrentSession();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
@@ -125,7 +126,7 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
     public Unit initChromecast(){
        simpleListener.setId(video.id.videoId);
        simpleListener.setYouTubePlayer(player);
-       playerContext = new ChromecastYouTubePlayerContext(MainActivity.sessionManager, simpleListener);
+       //simpleListener.setContext(getApplicationContext());
        return Unit.INSTANCE;
     }
 
@@ -133,7 +134,12 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
     public void onPlaying() {
         Log.i("playing", "playing");
         if(simpleListener.player != null){
-            simpleListener.player.play();
+            if(simpleListener.id.equals(video.id.videoId)){
+                simpleListener.player.play();
+            }else{
+                simpleListener.setId(video.id.videoId);
+                simpleListener.player.loadVideo(video.id.videoId,0f);
+            }
         }
     }
 
@@ -148,6 +154,7 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
     public void onStopped() {
         Log.i("playing", "stopped");
 
+        //playerContext.endCurrentSession();
     }
 
     @Override
@@ -157,8 +164,8 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
 
     @Override
     public void onSeekTo(int i) {
-        if(chromecastPlayer != null){
-            chromecastPlayer.seekTo(i);
+        if(simpleListener.player != null){
+            simpleListener.player.seekTo(i);
         }
     }
 
@@ -225,8 +232,9 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
     @Override
     public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
         player = youTubePlayer;
-        player.loadVideo(video.id.videoId);
         player.setPlaybackEventListener(this);
+        player.setPlayerStateChangeListener(this);
+        player.loadVideo(video.id.videoId);
         initChromecast();
     }
 
@@ -246,6 +254,40 @@ public class video_player extends AppCompatActivity implements YouTubePlayer.OnI
             getSupportActionBar().show();
         }
         super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onLoading() {
+
+    }
+
+    @Override
+    public void onLoaded(String s) {
+
+    }
+
+    @Override
+    public void onAdStarted() {
+
+    }
+
+    @Override
+    public void onVideoStarted() {
+        Log.i("playing", "starting");
+        if(simpleListener.player != null){
+            simpleListener.setId(video.id.videoId);
+            simpleListener.player.loadVideo(video.id.videoId,0f);
+        }
+    }
+
+    @Override
+    public void onVideoEnded() {
+        Log.i("playing", "finalice");
+    }
+
+    @Override
+    public void onError(YouTubePlayer.ErrorReason errorReason) {
+
     }
 
 

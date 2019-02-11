@@ -176,9 +176,9 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.home_menu, menu);
         Log.i("menu", "llego");
-        //CastButtonFactory.setUpMediaRouteButton(getApplicationContext(),
-          //      menu,
-            //    R.id.media_route_menu_item);
+        CastButtonFactory.setUpMediaRouteButton(getApplicationContext(),
+                menu,
+                R.id.media_route_menu_item);
         super.onCreateOptionsMenu(menu);
         return true;
     }

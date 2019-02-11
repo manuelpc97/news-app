@@ -124,9 +124,9 @@ public class ArticleDetail extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.home_menu, menu);
-        //CastButtonFactory.setUpMediaRouteButton(getApplicationContext(),
-          //      menu,
-            //    R.id.media_route_menu_item);
+        CastButtonFactory.setUpMediaRouteButton(getApplicationContext(),
+                menu,
+                R.id.media_route_menu_item);
         return true;
     }
 

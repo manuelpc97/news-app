@@ -1,5 +1,7 @@
 package com.example.android.news_app;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.chromecast.chromecastsender.ChromecastYouTubePlayerContext;
@@ -12,13 +14,19 @@ public class SimpleChromecastConnectionListener implements ChromecastConnectionL
 
     public String id;
     int time;
+    Context context;
     public com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer player;
     public com.google.android.youtube.player.YouTubePlayer youTubePlayer;
 
 
 
-    SimpleChromecastConnectionListener(String id){
+    SimpleChromecastConnectionListener(String id, Context context){
         this.id = id;
+        this.context = context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 
     public void setYouTubePlayer(com.google.android.youtube.player.YouTubePlayer player){
@@ -66,6 +74,8 @@ public class SimpleChromecastConnectionListener implements ChromecastConnectionL
                         player = youtubePlayer;
                         time = youTubePlayer.getCurrentTimeMillis() + 10;
                         player.loadVideo(id, 0f);
+                       //Intent intent = new Intent(context, ExpandedControlsActivity.class);
+                       //context.startActivity(intent);
                     }
                 });
             }

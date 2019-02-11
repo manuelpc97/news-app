@@ -34,7 +34,7 @@ public class Videos extends Fragment implements VideosAdapter.VideoClickListener
     Gson gson;
 
     String YOUTUBE_GET_URL = "https://www.googleapis.com/youtube/v3/search";
-    String API_KEY = "AIzaSyBneUVqtvreUp4KZxe9Njf6oGR7nXIWHKo";
+    String API_KEY = "AIzaSyDj_hWlpf2RnIoOTQ0jJ0EnX8DRPG0A1Hk";
 
     OkHttpClient client;
     Request request;
