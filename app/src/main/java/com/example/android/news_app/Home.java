@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -92,9 +93,6 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
             if(extras.containsKey("id")){
                 userId = extras.getString("id");
             }
-
-            Log.i("success", userName);
-            Log.i("success", userEmail);
         }
 
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -188,7 +186,20 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
         int selectedId = item.getItemId();
 
         if(selectedId == R.id.log_out){
-            logOut();
+            PopupMenu popup = new PopupMenu(this, findViewById(selectedId));
+            popup.getMenuInflater().inflate(R.menu.pop_up, popup.getMenu());
+
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int itemID =item.getItemId();
+                    if(itemID == R.id.logout_item){
+                        logOut();
+                    }
+                    return true;
+                }
+            });
+            popup.show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -209,6 +220,7 @@ public class Home extends AppCompatActivity implements ArticleAdapter.ArticleCli
 
     public void goToLogIn(){
         Intent intent = new Intent(this,MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 

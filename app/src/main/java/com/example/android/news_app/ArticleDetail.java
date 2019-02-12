@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -138,7 +139,21 @@ public class ArticleDetail extends AppCompatActivity {
         int id = item.getItemId();
 
         if(id == R.id.log_out){
-            goToLogIn();
+            PopupMenu popupMenu = new PopupMenu(this, findViewById(id));
+
+            popupMenu.getMenuInflater().inflate(R.menu.pop_up, popupMenu.getMenu());
+
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int itemID =item.getItemId();
+                    if(itemID == R.id.logout_item){
+                        goToLogIn();
+                    }
+                    return true;
+                }
+            });
+            popupMenu.show();
         }
 
         return true;
@@ -147,6 +162,7 @@ public class ArticleDetail extends AppCompatActivity {
 
     public void goToLogIn(){
         Intent intent = new Intent(this,MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 

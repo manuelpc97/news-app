@@ -21,6 +21,5 @@
         android:orderInCategory="2"
         app:showAsAction="ifRoom"
         android:title="LOG OUT"
-        android:icon="@drawable/shr_close_menu"/>
-
+        android:icon="@drawable/options2"/>
 </menu>

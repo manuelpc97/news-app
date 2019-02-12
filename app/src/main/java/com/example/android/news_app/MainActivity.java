@@ -137,8 +137,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public  void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.i("google", "on ActivityResult");
         if(requestCode == googleRequestCode){
             Task <GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
@@ -146,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> task){
+        Log.i("google", "handle result");
         try{
             account = task.getResult(ApiException.class);
             userName = account.getDisplayName();
@@ -159,6 +161,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void signIn(){
         Intent signInIntent = googleClient.getSignInIntent();
+        Log.i("google", "before intent");
+        signInIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivityForResult(signInIntent, googleRequestCode);
     }
 
